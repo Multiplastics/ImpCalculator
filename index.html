@@ -896,7 +896,20 @@
 .reel-split-inline .card-header { margin-bottom: 16px; }
 .reel-split-inline .card-header h2 { font-size: 18px; }
 .reel-split-inline .reel-split-one-row { align-items: end; }
-</style></head>
+</style><style>
+/* Section 5: keep all five visible result cards on one desktop row. */
+@media (min-width: 1051px) {
+  #forwardResults .results-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+  }
+  #forwardResults .result-box { min-width: 0; padding: 12px 11px; }
+  #forwardResults .result-value { min-width: 0; font-size: 19px; }
+  #forwardResults .result-value-line { min-width: 0; }
+  #forwardResults .result-label { font-size: 10px; }
+}
+</style>
+</head>
 <body>
 <div class="calculator-wrapper">
 <header class="page-header"><div class="diagram-heading">
@@ -1270,7 +1283,7 @@ async function exportImpressionsPDF() {
     if(val('targetReelMetres')){line('Reel length for breakdown',val('targetReelMetres')+' metres');}
   }else{
     if(basis==='length'){line('Net film weight per reel',out('printKg')+' kg');line('Impressions per reel',out('printPerReel'));line('Total film weight',out('printTotalKg')+' kg');}
-    else {line('Total film weight',out('printKg')+' kg');line('Calculated film length',out('printMetres')+' metres');}
+    else {line('Total film weight',out('printKg')+' kg');line('Calculated film length',Math.round(Number(out('printMetres').replace(/,/g,''))).toLocaleString('en-GB')+' metres');}
     line('Total impressions',out('printTotal'));
     line('Impressions per kilogram',out('printPerKg'));
   }
