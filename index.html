@@ -835,7 +835,7 @@
 </style><style>
 /* Keep the optional reel split controls and results on one desktop row. */
 .round-reels-option {margin:16px 0 8px;} .round-reels-option label {display:inline-flex;align-items:center;gap:9px;font-weight:600;cursor:pointer;} .round-reels-option input {width:17px;height:17px;accent-color:#087438;} .round-reels-summary {background:#edf7fa;border:1px solid #c7dfe8;border-radius:9px;padding:12px 15px;line-height:1.6;}
-.reel-split-one-row {display:grid;grid-template-columns:minmax(180px,1.25fr) auto minmax(180px,1fr) minmax(180px,1fr);gap:14px;align-items:end;margin-top:16px;}
+.reel-split-one-row {display:grid;grid-template-columns:minmax(180px,1.25fr) auto minmax(180px,1fr);gap:14px;align-items:end;margin-top:16px;}
 .reel-split-one-row > * {min-width:0;}
 .reel-split-one-row .reel-split-action {align-self:end;}
 .reel-split-one-row .reel-split-action button {white-space:nowrap;min-height:45px;}
@@ -908,6 +908,26 @@
   #forwardResults .result-value-line { min-width: 0; }
   #forwardResults .result-label { font-size: 10px; }
 }
+/* Keep the dynamic pricing label on one line at desktop widths. */
+@media (min-width: 951px) {
+  #printPanel #priceInputLabel {
+    white-space: nowrap;
+    font-size: 12px;
+    letter-spacing: -0.15px;
+  }
+}
+</style>
+<style>/* Compact bottom spacing in Section 1 only */
+#printPanel > section.card:first-child { padding-bottom: 12px; }
+</style>
+
+<style>
+/* Tighter vertical spacing in Section 4, without changing its fields or calculations. */
+#printPanel .impressions-with-illustration { row-gap: 10px; }
+#printPanel .impressions-with-illustration .pricing-inputs { margin-top: 0; }
+#printPanel .impressions-with-illustration .impression-note { margin: 4px 0 0; }
+#printPanel .impressions-with-illustration > .actions { margin-top: 8px; }
+#printPanel .reel-details-section { padding-bottom: 16px; }
 </style>
 </head>
 <body>
@@ -929,7 +949,7 @@
         </div>
 </div>
 <div id="printPanel">
-<section class="card"><div class="card-header"><div class="step-number">1</div><div><h2>Select material type</h2><p>Choose whether the printed film is a single layer or a two-layer laminate.</p></div></div><div class="field-group" style="max-width:320px;margin-bottom:18px"><label for="materialType">Select Material Type</label><select id="materialType"><option value="surface">Surface Printed</option><option value="laminated">Laminated</option></select></div></section><section class="card"><div class="card-header"><div class="step-number">2</div><div><h2>Select material</h2><p>Select the film type and thickness for each layer.</p></div></div><div class="material-layer-layout"><div class="input-grid"><div class="field-group"><label for="printDensity" id="layer1MaterialLabel">Film type / density</label><div class="input-with-unit"><select id="printDensity">
+<section class="card"><div class="card-header"><div class="step-number">1</div><div><h2>Select material type</h2><p>Choose whether the printed film is a single layer or a two-layer laminate.</p></div></div><div class="field-group" style="max-width:320px;margin-bottom:0"><label for="materialType">Select Material Type</label><select id="materialType"><option value="surface">Surface Printed</option><option value="laminated">Laminated</option></select></div></section><section class="card"><div class="card-header"><div class="step-number">2</div><div><h2>Select material</h2><p>Select the film type and thickness for each layer.</p></div></div><div class="material-layer-layout"><div class="input-grid"><div class="field-group"><label for="printDensity" id="layer1MaterialLabel">Film type / density</label><div class="input-with-unit"><select id="printDensity">
 <option selected="" value="0.91">OPP — 0.91</option>
 <option value="0.97">OPP White — 0.97</option>
 <option value="0.65">OPP Cavitated — 0.65</option>
@@ -947,9 +967,9 @@
 <div class="field-group"><label for="targetReelMetres">Metres per reel</label><div class="input-with-unit"><input class="required-input" id="targetReelMetres" min="0" placeholder="e.g. 5000" step="any" type="number"/><span class="unit">metres</span></div></div>
 <div class="reel-split-action"><button class="button-primary" onclick="calculateReelSplit()" type="button">Calculate reels</button></div>
 <div class="result-box"><span class="result-label">Impressions per full reel</span><div class="result-value-line"><input aria-label="Impressions per full reel" class="result-value" id="splitPerReel" readonly="" value="—"/></div></div>
-<div class="result-box"><span class="result-label">Impressions on part reel</span><div class="result-value-line"><input aria-label="Impressions on part reel" class="result-value" id="splitPartReel" readonly="" value="—"/></div></div>
+
 </div>
-<div class="round-reels-option"><label><input type="checkbox" id="roundFullReels" onchange="calculateReelSplit()"/> Round up to full reels only</label></div>
+
 <p id="splitMessage" role="status"></p>
 <p id="roundReelsMessage" class="round-reels-summary" role="status" hidden></p>
 <p class="impression-note">Reels contain whole print repeats. If your target length is not an exact multiple of the repeat, the full-reel length is rounded down to the nearest complete repeat.</p>
@@ -1119,7 +1139,7 @@ function calculateFilmRequired() {
 function clearReelSplit() {
     document.getElementById('splitMessage').textContent = '';
     const rounded=document.getElementById('roundReelsMessage'); rounded.textContent=''; rounded.hidden=true;
-    setValue('splitPerReel','—');setValue('splitPartReel','—');
+    setValue('splitPerReel','—');
 }
 function calculateReelSplit() {
     clearReelSplit();
@@ -1131,23 +1151,18 @@ function calculateReelSplit() {
     const capacity=target*1000/repeat;
     const perReel=Math.floor(capacity+Number.EPSILON*Math.max(1,capacity)*4);
     if(!Number.isSafeInteger(perReel)||perReel<1){message.textContent='Enter a reel length that fits at least one complete print repeat and is within a practical range.';return false;}
-    const full=Math.floor(impressions/perReel),remaining=impressions%perReel;
-    const count=full+(remaining>0?1:0);
-    setValue('splitPerReel',full ? perReel.toLocaleString('en-GB') : '—');
-    setValue('splitPartReel',remaining ? remaining.toLocaleString('en-GB') : '—');
+    const count=Math.ceil(impressions/perReel);
+    setValue('splitPerReel',perReel.toLocaleString('en-GB'));
     const fmt=n=>n.toLocaleString('en-GB',{maximumFractionDigits:3});
-    message.textContent=fmt(count)+' reel'+(count===1?'':'s')+' required: '+(full?fmt(full)+' full reel'+(full===1?'':'s')+' at '+fmt(perReel*repeat/1000)+' metres':'')+(full&&remaining?' + ':'')+(remaining?'1 part reel at '+fmt(remaining*repeat/1000)+' metres':'')+'.';
-    if(document.getElementById('roundFullReels').checked){
-        const fullLength=perReel*repeat/1000;
-        const orderedMetres=count*fullLength;
-        const requiredMetres=impressions*repeat/1000;
-        const extraMetres=Math.max(0,orderedMetres-requiredMetres);
-        const extraImpressions=count*perReel-impressions;
-        const rounded=document.getElementById('roundReelsMessage');
-        rounded.hidden=false;
-        rounded.textContent='Full reels only: '+fmt(count)+' × '+fmt(fullLength)+' metres = '+fmt(orderedMetres)+' metres supplied. Additional film: '+fmt(extraMetres)+' metres ('+fmt(extraImpressions)+' extra impressions).';
-        setValue('splitPartReel','0');
-    }
+    const fullLength=perReel*repeat/1000;
+    const orderedMetres=count*fullLength;
+    const requiredMetres=impressions*repeat/1000;
+    const extraMetres=Math.max(0,orderedMetres-requiredMetres);
+    const extraImpressions=count*perReel-impressions;
+    message.textContent='Rounded up to full reels: '+fmt(count)+' reel'+(count===1?'':'s')+' at '+fmt(fullLength)+' metres each.';
+    const rounded=document.getElementById('roundReelsMessage');
+    rounded.hidden=false;
+    rounded.textContent='Full reels only: '+fmt(count)+' × '+fmt(fullLength)+' metres = '+fmt(orderedMetres)+' metres supplied. Additional film: '+fmt(extraMetres)+' metres ('+fmt(extraImpressions)+' extra impressions).';
     return true;
 }
 </script>
